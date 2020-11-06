@@ -57,7 +57,7 @@ class home(TemplateView):
                     'min': 0,
                         }              
 
-        myMap = folium.Map(location = [15.2448, 104.8473], zoom_start = 9)
+        myMap = folium.Map(location = [15.2448, 105.1], zoom_start = 12)
         myMap.add_ee_layer(image, visParams1, 'True_Color')
         myMap.add_ee_layer(image, visParams3, 'False_Color')
         myMap.add_ee_layer(image, visParams2, 'Natural_Infrared')
