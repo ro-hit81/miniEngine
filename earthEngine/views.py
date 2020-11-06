@@ -15,35 +15,54 @@ class home(TemplateView):
 
     def get_context_data(self, **kwargs):
         figure = folium.Figure()
-        m = folium.Map(
-            location = [28, 83],
-            zoom_start = 8
-        )
-        m.add_to(figure)
 
-        dataset = (ee.ImageCollection('MODIS/006/MOD13Q1')
-                  .filter(ee.Filter.date('2019-07-01', '2019-11-30'))
-                  .first())
-        modisndvi = dataset.select('NDVI')
+        bands = ['B2', 'B3', 'B4', 'B8', 'B11', 'B12', 'QA60']
+        bound = ee.FeatureCollection('users/rhtkhati/Ubon_Boundary')
+        def maskS2clouds(image):
+            qa = image.select('QA60')
+            cloudBitMask = 1 << 10
+            cirrusBitMask = 1 << 11
+            mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+            mask = mask.bitwiseAnd(cirrusBitMask).eq(0)
 
-        vis_paramsNDVI = {
-            'min': 0,
-            'max': 9000,
-            'palette': [ 'FE8374', 'C0E5DE', '3A837C','034B48',]
-        }
+            return image.updateMask(mask).divide(10000)
+        collection = (ee.ImageCollection("COPERNICUS/S2")
+                    .select(bands)
+                    .filter(ee.Filter.date('2019-01-01', '2019-03-31'))
+                    .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1))
+                    .map(maskS2clouds)
+                    )
+        def add_ee_layer(self, eeImageObject, visParams, name):
+            mapID = ee.Image(eeImageObject).getMapId(visParams)
+            folium.TileLayer(
+                tiles = mapID['tile_fetcher'].url_format,
+                attr = "Map Data © Google Earth Engine",
+                name = name,
+                overlay = True,
+                control = True
+            ).add_to(self)
+        folium.Map.add_ee_layer = add_ee_layer
+        image = collection.sort('system:index', opt_ascending=False).mosaic()
+        image = image.clip(bound)
+        visParams1 = {'bands': ["B4","B3","B2"],
+                    'max': 0.4,
+                    'min': 0
+                        }
+        visParams2 = {'bands': ["B11","B8","B3"],
+                    'max': 0.4,
+                    'min': 0
+                        }
+        visParams3 = {'bands': ["B8","B4","B3"],
+                    'max': 0.4,
+                    'min': 0,
+                        }              
 
-        map_id_dict = ee.Image(modisndvi).getMapId(vis_paramsNDVI)
-
-        folium.raster_layers.TileLayer(
-            tiles = map_id_dict['tile_fetcher'].url_format,
-            attr = 'Google Earth Engine',
-            name = 'NDVI',
-            overlay = True,
-            control = True
-        ).add_to(m)
-
-        m.add_child(folium.LayerControl())
-
+        myMap = folium.Map(location = [15.2448, 104.8473], zoom_start = 9)
+        myMap.add_ee_layer(image, visParams1, 'True_Color')
+        myMap.add_ee_layer(image, visParams3, 'False_Color')
+        myMap.add_ee_layer(image, visParams2, 'Natural_Infrared')
+        myMap.add_child(folium.LayerControl())
+        myMap.add_to(figure)
         figure.render()
 
         return{"map": figure}
