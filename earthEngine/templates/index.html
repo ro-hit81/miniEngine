@@ -3,11 +3,34 @@
         <title>Django and GEE</title>
 
         {{ map.header.render|safe }}
+        <style>
+            .header{
+                height: 10%;
+                background-color: cadetblue;
+                text-align: center;
+                font-size: 40px;
+            }
+            .content{
+                margin-top: 2px;
+                margin-right: 0px;
+                height: 85%;
+            }
+            .detail{
+                background-color: chocolate;
+                height: 100%;
+            }
+        </style>
     </head>
 
     <body>
-        <div class="row">
-            <div class="col-lg-12">
+        <div class="header">
+            <b>Mini-Engine</b>
+        </div>
+        <div class="content">
+            <div class="col-lg-3 detail">
+                DETAILS HERE
+            </div>
+            <div class="col-lg-9">
                 {{ map.html.render|safe }}
             </div>
         </div>
