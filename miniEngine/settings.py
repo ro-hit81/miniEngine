@@ -25,7 +25,9 @@ SECRET_KEY = 'hz##2b0$z9iy6!$5!9e2@rfofe(-r2nj0curvk2+dkmej@hlu@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
+
+CORS_ORIGIN_ALLOW_ALL = True     # make possible to run ajax
 
 
 # Application definition
@@ -40,11 +42,14 @@ INSTALLED_APPS = [
 
     #Third party apps:
     'earthEngine',
+    'rest_framework',       # used to create an api
+    'corsheaders',          # allows to request ajax
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
