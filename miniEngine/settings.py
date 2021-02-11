@@ -40,10 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #Third party apps:
-    'earthEngine',
+    # Third party apps:
     'rest_framework',       # used to create an api
     'corsheaders',          # allows to request ajax
+
+    # Personal apps:
+    'earthEngine',
+
 ]
 
 MIDDLEWARE = [
